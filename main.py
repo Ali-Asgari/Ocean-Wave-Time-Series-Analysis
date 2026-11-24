@@ -1,5 +1,10 @@
 import pandas as pd
 
+def filter_dates(df, start, end):
+    if pd.Timestamp(end) <= pd.Timestamp(start):
+        raise ValueError('End date must follow start date')
+    return df.loc[(df.index >= start) & (df.index < end)].copy()
+
 def main():
     # Load dataset
     df = pd.read_csv("c44137.csv")
@@ -19,6 +24,7 @@ def main():
     print ("Info:")
     df.info()
 
+    print(filter_dates(df, '1990-01-01', '2023-01-01'))
 
 
 if __name__ == '__main__':
