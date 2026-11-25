@@ -18,13 +18,30 @@ def main():
     # Use DATE as the index.
     df = df.set_index("DATE").sort_index()
 
-    print ("Head:\n", df.head())
+    # Select a period 
+    df = filter_dates(df, '1990-01-01', '2023-01-01')
 
-    print ("-"*30)
-    print ("Info:")
-    df.info()
+    print('Rows:', len(df))
+    print('Dates:', df.index.min(), 'to', df.index.max())
+    print('Columns:', df.columns.tolist())
 
-    print(filter_dates(df, '1990-01-01', '2023-01-01'))
+    # 0    Blank - No quality control (QC) has been performed
+    # 1    Good - QC has been performed: record appears correct
+    # 3    Doubtful - QC has been performed: record appears doubtful
+    # 4    Erroneous - QC has been performed: record appears erroneous
+    # 5    Changes - The record has been changed as a result of QC
+    # 6    Acceptable - QC has been performed: record seems inconsistent with other records
+    # 7    Off Position - There is a problem with the buoy position or mooring. Data may still be useful.
+    # 8    Reserved
+    # 9    Reserved - indicates missing elements
+    print('Flags:', df['Q_FLAG'].value_counts(dropna=False).to_dict())
+
+
+    #VCAR: Characteristic significant wave height (calculated by MEDS) (m)
+    #SSTP: Sea surface temperature (°C) 
+    #WSPD: Horizontal wind speed (m/s)
+    print(df[['VCAR', 'SSTP', 'WSPD']].describe())
+
 
 
 if __name__ == '__main__':
