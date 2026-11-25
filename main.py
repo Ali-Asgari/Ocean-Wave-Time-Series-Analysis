@@ -5,18 +5,27 @@ def filter_dates(df, start, end):
         raise ValueError('End date must follow start date')
     return df.loc[(df.index >= start) & (df.index < end)].copy()
 
-def main():
-    # Load dataset
-    df = pd.read_csv("c44137.csv")
+def load_data(path):
+    df = pd.read_csv(path)
 
-    # Convert the DATE column.
+    # Remove empty columns created by the CSV header.
+    df = df.loc[:, ~df.columns.str.startswith("Unnamed:")]
+    
+    # Convert the DATE column
     df["DATE"] = pd.to_datetime(
         df["DATE"],
         format="%m/%d/%Y %H:%M"
     )
 
-    # Use DATE as the index.
+    # Use DATE as the index
     df = df.set_index("DATE").sort_index()
+
+    return df
+
+def main():
+    # Load dataset
+    # df = pd.read_csv("c44137.csv")
+    df = load_data("c44137.csv")
 
     # Select a period 
     df = filter_dates(df, '1990-01-01', '2023-01-01')
