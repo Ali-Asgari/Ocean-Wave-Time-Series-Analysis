@@ -103,5 +103,30 @@ def main():
     print("\nQuality flags by year:")
     print(flag_counts)
 
+    # Compare the two wave-height columns.
+    print("\nWave-height summary:")
+    print(df[["VCAR", "VWH$"]].describe())
+
+    print("\nLargest buoy-reported wave heights:")
+    print(
+        df.nlargest(10, "VWH$")[["VCAR", "VWH$", "Q_FLAG"]]
+    )
+
+    print("\nSmallest buoy-reported wave heights:")
+    print(
+        df.nsmallest(10, "VWH$")[["VCAR", "VWH$", "Q_FLAG"]]
+    )
+
+    # Check availability and range of buoy-reported heights by year.
+    yearly_wave = df.groupby(df.index.year)["VWH$"].agg(
+        ["size", "count", "min", "max"]
+    )
+    yearly_wave["missing"] = (
+        yearly_wave["size"] - yearly_wave["count"]
+    )
+
+    print("\nBuoy-reported wave heights by year:")
+    print(yearly_wave.to_string())
+
 if __name__ == '__main__':
     main()
