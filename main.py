@@ -10,7 +10,7 @@ def load_data(path):
 
     # Remove empty columns created by the CSV header.
     df = df.loc[:, ~df.columns.str.startswith("Unnamed:")]
-    
+
     # Convert the DATE column
     df["DATE"] = pd.to_datetime(
         df["DATE"],
@@ -33,7 +33,11 @@ def main():
     print('Rows:', len(df))
     print('Dates:', df.index.min(), 'to', df.index.max())
     print('Columns:', df.columns.tolist())
-
+    # Columns = ['STN_ID', 'Q_FLAG', 'LATITUDE', 'LONGITUDE', 'DEPTH', 'VCAR',
+    #             'VTPK', 'VWH$', 'VCMX', 'VTP$', 'WDIR', 'WSPD', 'WSS$',
+    #             'GSPD', 'WDIR.1', 'WSPD.1', 'WSS$.1', 'GSPD.1', 'ATMS',
+    #             'ATMS.1', 'DRYT', 'SSTP']
+    
     # 0    Blank - No quality control (QC) has been performed
     # 1    Good - QC has been performed: record appears correct
     # 3    Doubtful - QC has been performed: record appears doubtful
@@ -51,7 +55,53 @@ def main():
     #WSPD: Horizontal wind speed (m/s)
     print(df[['VCAR', 'SSTP', 'WSPD']].describe())
 
+    
+    print("\nLargest wave-height measurements:")
+    print(
+        df.nlargest(10, "VCAR")[["VCAR", "VWH$", "Q_FLAG"]]
+    )
 
+    print("\nLowest sea temperatures:")
+    print(df.nsmallest(10, "SSTP")[["SSTP", "Q_FLAG"]])
+
+    print("\nHighest sea temperatures:")
+    print(df.nlargest(10, "SSTP")[["SSTP", "Q_FLAG"]])
+
+
+    print("\nLowest wind speeds:")
+    print(df.nsmallest(10, "WSPD")[["WSPD", "WSPD.1", "Q_FLAG"]])
+
+    print("\nHighest wind speeds:")
+    print(df.nlargest(10, "WSPD")[["WSPD", "WSPD.1", "Q_FLAG"]])
+
+    print("\nMissing wind-speed measurements:")
+    print(df[["WSPD", "WSPD.1"]].isna().sum())
+
+    # Count missing measurements
+    print("\nMissing measurements:")
+    print(df[["VCAR", "SSTP", "WSPD"]].isna().sum())
+
+    flag_1_df = df.loc[df["Q_FLAG"] == 1]
+
+    print("\nLargest wave heights with Q_FLAG = 1:")
+    print(flag_1_df.nlargest(10, "VCAR")[["VCAR", "VWH$", "Q_FLAG"]])
+
+    print("\nLowest temperatures with Q_FLAG = 1:")
+    print(flag_1_df.nsmallest(10, "SSTP")[["SSTP", "Q_FLAG"]])
+
+
+    coverage = pd.DataFrame({
+        "all_records": df.groupby(df.index.year).size(),
+        "flag_1_records": flag_1_df.groupby(flag_1_df.index.year).size()
+    }).fillna(0).astype(int)
+    print("\nYearly record counts before and after flag-1 filtering:")
+    print(coverage)
+
+
+    flag_counts = pd.crosstab(df.index.year, df["Q_FLAG"])
+
+    print("\nQuality flags by year:")
+    print(flag_counts)
 
 if __name__ == '__main__':
     main()
