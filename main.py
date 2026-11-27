@@ -1,4 +1,5 @@
 import pandas as pd
+import matplotlib.pyplot as plt
 
 def filter_dates(df, start, end):
     if pd.Timestamp(end) <= pd.Timestamp(start):
@@ -128,5 +129,30 @@ def main():
     print("\nBuoy-reported wave heights by year:")
     print(yearly_wave.to_string())
 
+    fig, axes = plt.subplots(1, 2, figsize=(10, 5))
+
+    axes[0].boxplot(
+        [
+            flag_1_df["VCAR"].dropna(),
+            flag_1_df["VWH$"].dropna()
+        ]
+    )
+    axes[0].set_xticks([1, 2], ["VCAR", "VWH$"])
+    axes[0].set_title("Wave height: Q_FLAG = 1")
+    axes[0].set_ylabel("Wave height (m)")
+
+    axes[1].boxplot(
+        [
+            flag_1_df["WSPD"].dropna(),
+            flag_1_df["WSPD.1"].dropna()
+        ]
+    )
+    axes[1].set_xticks([1, 2], ["WSPD", "WSPD.1"])
+    axes[1].set_title("Wind speed: Q_FLAG = 1 records")
+    axes[1].set_ylabel("Wind speed (m/s)")
+
+    plt.tight_layout()
+    plt.show()
+    
 if __name__ == '__main__':
     main()
